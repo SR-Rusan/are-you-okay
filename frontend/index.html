@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Are You Okay? (আর ইউ ওকে?) — AI Family Care Layer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Header -->
+    <header class="main-header">
+      <div class="brand">
+        <div class="brand-logo">💚</div>
+        <div>
+          <h1>Are You Okay? <span class="bn-title">(আর ইউ ওকে?)</span></h1>
+          <p class="tagline">প্রবাসী সন্তানদের বাবা-মায়ের জন্য এআই কেয়ার সহকারী ও ডিস্ট্রেস ডিটেকশন লেয়ার</p>
+        </div>
+      </div>
+      <div class="header-badges">
+        <span class="badge badge-subtle" id="llm-indicator">LLM: OpenAI 120B (Groq)</span>
+        <span class="badge badge-subtle" id="voice-indicator">Voice: Nabanita (Female)</span>
+        <span class="badge badge-subtle">STT: Groq Whisper-Large-v3</span>
+      </div>
+    </header>
+
+    <!-- Persona & Mode Controls -->
+    <section class="control-bar card">
+      <div class="control-group">
+        <label for="user-select"><strong>ডেমো ইউজার নির্বাচন (Elderly Persona):</strong></label>
+        <select id="user-select">
+          <option value="user_new">১. নতুন অভিভাবক: ছবি বেগম (Consent Flow Demo)</option>
+          <option value="user_fatema" selected>২. মা: বেগম ফাতেমা (Memory Follow-up Demo - Knee Pain)</option>
+          <option value="user_rafiq">৩. বাবা: রফিকুল ইসলাম (Distress & Sadness Demo)</option>
+        </select>
+        <button id="btn-reset-user" class="btn btn-secondary btn-sm" title="মেমোরি ও কনসেন্ট রিসেট করুন">🔄 রিসেট প্রোফাইল</button>
+      </div>
+
+      <div class="control-group right-controls">
+        <div class="mode-toggle">
+          <button id="btn-mode-text" class="btn-mode active">💬 টেক্সট মোড</button>
+          <button id="btn-mode-voice" class="btn-mode">🎙️ ভয়েস মোড</button>
+        </div>
+        <button id="btn-start-session" class="btn btn-primary">▶️ সেশন শুরু করুন</button>
+        <button id="btn-end-session" class="btn btn-danger" disabled>⏹️ সেশন সমাপ্ত ও রুব্রিক যাচাই</button>
+      </div>
+    </section>
+
+    <!-- Dedicated Voice Selection & Expressiveness Studio -->
+    <section class="voice-bar card" style="margin-top: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; background: #f0fdf4; border: 1.5px solid #86efac; padding: 12px 18px;">
+      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <span style="font-size: 1.25rem;">🔊</span>
+        <label for="tts-voice-select" style="font-weight: 700; color: #14532d; font-size: 0.95rem;">এআই কণ্ঠ নির্বাচন (Voice Persona):</label>
+        <select id="tts-voice-select" style="padding: 8px 14px; border-radius: 8px; border: 1.5px solid #16a34a; font-weight: 600; color: #0f172a; background: #ffffff; min-width: 280px; cursor: pointer;">
+          <option value="bn-BD-NabanitaNeural" selected>👩 নবনিতা (নারী কণ্ঠ - মমতাময়ী ও স্নেহশীল কন্যা)</option>
+          <option value="bn-BD-PradeepNeural">👨 প্রদীপ (পুরুষ কণ্ঠ - দায়িত্বশীল ও স্নেহশীল পুত্র)</option>
+          <option value="bn-IN-TanishaaNeural">👩 তানিশা (নারী কণ্ঠ - মিষ্টি ও আনন্দময়)</option>
+          <option value="bn-IN-BashkarNeural">👨 ভাস্কর (পুরুষ কণ্ঠ - শান্ত ও গম্ভীর)</option>
+          <option value="nova">✨ OpenAI Nova (Warm Expressive)</option>
+          <option value="alloy">✨ OpenAI Alloy (Neutral Balanced)</option>
+        </select>
+        <button id="btn-preview-voice" class="btn btn-secondary btn-sm" style="background: #ffffff; border: 1.5px solid #16a34a; color: #15803d; font-weight: 700; padding: 7px 14px; display: inline-flex; align-items: center; gap: 6px;" title="কণ্ঠটির নমুনা শুনুন">
+          <span>▶️</span> কণ্ঠ টেস্ট শুনুন
+        </button>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <label for="voice-style-select" style="font-weight: 600; color: #334155; font-size: 0.88rem;">💖 আবেগ ও সুর (Tone):</label>
+        <select id="voice-style-select" style="padding: 7px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.88rem; font-weight: 600; background: #ffffff; cursor: pointer;">
+          <option value="expressive" selected>💖 আবেগপ্রবণ ও মমতাময়ী (Expressive)</option>
+          <option value="gentle">🌿 অত্যন্ত কোমল ও শান্ত (Soft & Gentle)</option>
+          <option value="normal">🗣️ স্বাভাবিক কথপোকথন (Standard)</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Main Workspace Grid -->
+    <main class="workspace-grid">
+      <!-- Left Column: Memory & Expat Family Info -->
+      <aside class="sidebar card">
+        <div class="sidebar-section">
+          <h3>👤 অভিভাবকের তথ্য</h3>
+          <div class="info-row">
+            <span class="info-label">নাম:</span>
+            <span class="info-value" id="disp-user-name">বেগম ফাতেমা</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">প্রবাসী সন্তান:</span>
+            <span class="info-value" id="disp-kin-name">মাহমুদুল হাসান (লন্ডন, যুক্তরাজ্য)</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">জরুরি ফোন:</span>
+            <span class="info-value" id="disp-kin-phone">+44-7700-900123</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">কনসেন্ট স্ট্যাটাস:</span>
+            <span id="disp-consent-badge" class="status-pill status-consented">সম্মতিপ্রাপ্ত</span>
+          </div>
+        </div>
+
+        <div class="sidebar-section memory-box">
+          <div class="memory-header">
+            <h3>🧠 এআই মেমোরি (Memory Context)</h3>
+            <span class="badge-accent">Persistent SQLite</span>
+          </div>
+          <p class="memory-note">পরবর্তী সেশনে কুশল বিনিময়ের সময় এআই এই তথ্যটি মনে রেখে কথা বলে:</p>
+          <div id="disp-memory-text" class="memory-content">
+            "গতবার তিনি জানিয়েছিলেন ডান হাঁটুতে বেশ ব্যথা করছিল আর রাতে ঘুমে একটু সমস্যা হচ্ছিল।"
+          </div>
+        </div>
+
+        <div class="sidebar-section rubric-box">
+          <h3>📋 ডিস্ট্রেস মূল্যায়ন রুব্রিক (Fixed 4 Rules)</h3>
+          <ul class="rubric-list">
+            <li><strong>(a) একাকীত্ব/বিষণ্নতা:</strong> একাকী বোধ করা, কান্না বা বিষাদগ্রস্ত বক্তব্য।</li>
+            <li><strong>(b) শারীরিক অসুস্থতা/অনাহার:</strong> ব্যথা, অসুস্থতা বা খাবার না খাওয়ার উল্লেখ।</li>
+            <li><strong>(c) স্বাভাবিকের চেয়ে গুটিয়ে নেওয়া:</strong> এক কথায় অনিচ্ছুক সংক্ষিপ্ত উত্তর (Withdrawal)।</li>
+            <li><strong>(d) সরাসরি সহায়তার ডাক:</strong> ডাক্তার বা কাউকে পাঠানোর জরুরি আবেদন।</li>
+          </ul>
+        </div>
+      </aside>
+
+      <!-- Center Column: Chat & Voice Interaction Area -->
+      <section class="chat-panel card">
+        <div class="chat-header">
+          <div class="chat-status-indicator">
+            <span id="session-dot" class="dot dot-idle"></span>
+            <span id="session-status-text">সেশন অপেক্ষমাণ। 'সেশন শুরু করুন' চাপুন।</span>
+          </div>
+          <div id="audio-playing-indicator" class="audio-waves hidden">
+            <span></span><span></span><span></span><span></span>
+            <small>AI কথা বলছে...</small>
+          </div>
+        </div>
+
+        <!-- Chat Stream Messages -->
+        <div id="chat-messages" class="chat-messages">
+          <div class="message-bubble system-note">
+            👋 'Are You Okay?' প্ল্যাটফর্মে স্বাগতম। আপনি টেক্সট অথবা ভয়েস যেকোনো মোডে পিতা-মাতার ভূমিকা পালন করে এআই সহকারীর সাথে কথা বলতে পারেন।
+          </div>
+        </div>
+
+        <!-- Consent Quick Action Prompt (Shows only if pending) -->
+        <div id="consent-prompt-actions" class="consent-actions hidden">
+          <p>🔔 <strong>অভিভাবকের সম্মতি প্রয়োজন:</strong> আপনি কি সম্মতি দিচ্ছেন?</p>
+          <div class="action-buttons">
+            <button id="btn-quick-consent-yes" class="btn btn-success btn-sm">✅ হ্যাঁ, আমি সম্মতি দিচ্ছি</button>
+            <button id="btn-quick-consent-no" class="btn btn-outline-danger btn-sm">❌ না, দরকার নেই</button>
+          </div>
+        </div>
+
+        <!-- Input Area (Text Mode) -->
+        <div id="text-input-area" class="chat-input-area">
+          <textarea id="text-input" placeholder="অভিভাবক হিসেবে বাংলায় উত্তর লিখুন (যেমন: শরীরটা আজ একটু দুর্বল লাগছে...)" rows="2"></textarea>
+          <button id="btn-send-text" class="btn btn-primary">পাঠান 📤</button>
+        </div>
+
+        <!-- Input Area (Voice Mode) -->
+        <div id="voice-input-area" class="voice-input-area hidden">
+          <div class="mic-container">
+            <button id="btn-mic" class="btn-mic" title="কথা বলতে চাপ দিন">
+              <span class="mic-icon">🎙️</span>
+            </button>
+            <div id="mic-status-label" class="mic-label">কথা বলতে মাইক বাটনে ক্লিক করুন</div>
+            <div id="recording-timer" class="recording-timer hidden">00:00</div>
+          </div>
+
+          <!-- Live Voice Recognition Preview Box -->
+          <div id="live-speech-box" class="live-speech-box hidden">
+            <div class="live-speech-header">
+              <span>🗣️ চিহ্নিত বাংলা কথা (Live Transcript):</span>
+              <span id="stt-engine-badge" class="badge">লাইভ বাংলা</span>
+            </div>
+            <div id="live-speech-text" class="live-speech-text">শুনছি...</div>
+          </div>
+
+          <!-- Browser Guidance Card -->
+          <div class="browser-guidance-card">
+            <span class="guide-icon">💡</span>
+            <div class="guide-text">
+              <strong>সেরা অভিজ্ঞতার টিপ:</strong> <strong>Google Chrome</strong> বা <strong>Microsoft Edge</strong>-এ খুললে ব্রাউজারের বিল্ট-ইন স্পীচ এপিআই দিয়ে সাথে সাথে লাইভ বাংলা টাইপ হয়ে যায় (Zero Latency)। Brave বা অন্যান্য ব্রাউজারে বিল্ট-ইন স্পীচ ব্লক থাকলে অডিওটি স্বয়ংক্রিয়ভাবে ব্যাকএন্ড Whisper এআই দিয়ে বাংলায় নিখুঁতভাবে রূপান্তরিত হবে।
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Live Distress Detection & Alerts Drawer -->
+      <aside class="alerts-panel card">
+        <div class="panel-header">
+          <h3>🚨 অ্যালার্ট ও অডিট লগ (Alert Stub)</h3>
+          <span id="alert-counter" class="badge badge-danger">0 Alerts</span>
+        </div>
+        
+        <div id="last-evaluation-card" class="eval-result-card hidden">
+          <div class="eval-header">
+            <h4>সর্বশেষ সেশনের রুব্রিক ফলাফল</h4>
+            <span id="eval-flag-pill" class="status-pill status-flagged">FLAGGED</span>
+          </div>
+          <p><strong>চিহ্নিত রুল:</strong> <span id="eval-rule-name">RULE_B_PHYSICAL_DISCOMFORT_NUTRITION</span></p>
+          <p><strong>কারণ:</strong> <span id="eval-reason">Parent explicitly stated chest pain and not eating.</span></p>
+          <div class="sms-preview-box">
+            <span class="sms-label">📱 সিমুলেটেড SMS (প্রবাসী সন্তানের কাছে প্রেরিত):</span>
+            <p id="eval-sms-text" class="sms-text">"Care Alert from 'Are You Okay?': Your mother's recent pattern has changed noticeably. Consider calling her today."</p>
+          </div>
+        </div>
+
+        <div class="recent-alerts-list">
+          <h4>সাম্প্রতিক নোটিফিকেশন হিস্ট্রি (alerts.json)</h4>
+          <div id="alerts-feed" class="alerts-feed">
+            <div class="empty-state">কোনো সতর্কবার্তা পাওয়া যায়নি। কোনো সেশনে ডিস্ট্রেস চিহ্নিত হলে এখানে প্রদর্শিত হবে।</div>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Audio Player (Hidden helper element) -->
+    <audio id="tts-audio-player" style="display:none;"></audio>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
