@@ -15,3 +15,5 @@ venv/
 *.mp3
 credentials*.json
 token*.json
+
+alerts.json
